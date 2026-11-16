@@ -1,0 +1,249 @@
+/* ==========================================================================
+   Фичи интерфейса (js/features.js): быстрый поиск, горячие клавиши,
+   переключатель темы, кнопка «Наверх», прогресс чтения, анимации.
+   Подключается после style.css, app.css и theme-dark.css.
+   ========================================================================== */
+
+/* ---------- Иконки фич ---------- */
+.ico-moon { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'/%3E%3C/svg%3E"); }
+.ico-sun { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Cpath d='M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41'/%3E%3C/svg%3E"); }
+.ico-arrow-up { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 19V5M5 12l7-7 7 7'/%3E%3C/svg%3E"); }
+.ico-keyboard { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='5' width='20' height='14' rx='2'/%3E%3Cpath d='M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 13h.01M18 13h.01M10 13h4M8 16h8'/%3E%3C/svg%3E"); }
+.ico-enter { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 10l-5 5 5 5'/%3E%3Cpath d='M20 4v7a4 4 0 0 1-4 4H4'/%3E%3C/svg%3E"); }
+
+/* ---------- Клавиши ---------- */
+kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border: 1px solid var(--border-2);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--head-bg);
+  color: var(--text-2);
+  font: 500 11px/1 'Golos Text', system-ui, sans-serif;
+  white-space: nowrap;
+}
+kbd + kbd { margin-left: 4px; }
+
+/* ---------- Кнопки в оболочке: поиск, тема ---------- */
+.sider-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: calc(100% - 16px);
+  height: 36px;
+  margin: 12px 8px 0;
+  padding: 0 10px 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.65);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.sider-search:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.22); color: #fff; }
+.sider-search span { flex: 1; text-align: left; }
+.sider-search kbd { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.16); color: rgba(255, 255, 255, 0.6); }
+
+button.rail-row {
+  border-width: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.hdr-btn {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* ---------- Быстрый поиск (командная палитра) ---------- */
+.modal.palette-modal { padding: 0 !important; overflow: hidden; }
+.palette-modal .modal-close { display: none; }
+.pal-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 18px;
+  cursor: text;
+}
+.pal-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 16px;
+  color: var(--text);
+}
+.pal-search input::placeholder { color: var(--text-3); }
+.pal-list { max-height: min(60vh, 440px); overflow-y: auto; padding: 4px 0 8px; }
+.pal-group {
+  padding: 12px 18px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.pal-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 8px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  color: var(--text);
+  cursor: pointer;
+}
+.pal-item.is-active { background: var(--row-hover); box-shadow: inset 3px 0 0 var(--primary); }
+.pal-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--head-bg);
+  color: var(--text-2);
+  font-size: 16px;
+}
+.pal-item.is-active .pal-ico { color: var(--primary); }
+.pal-item .grow { flex: 1; min-width: 0; }
+.pal-title, .pal-sub { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pal-sub { font-size: 12px; color: var(--text-2); }
+.pal-item mark { background: rgba(242, 85, 27, 0.18); color: inherit; border-radius: 2px; }
+.pal-enter { flex: none; color: var(--text-3); opacity: 0; transition: opacity 0.15s; }
+.pal-item.is-active .pal-enter { opacity: 1; }
+.pal-empty { padding: 40px 18px; text-align: center; color: var(--text-2); }
+.pal-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  padding: 10px 18px;
+  border-top: 1px solid var(--border);
+  background: var(--head-bg);
+  font-size: 12px;
+  color: var(--text-2);
+}
+.pal-foot-tip { margin-left: auto; }
+@media (max-width: 767px) {
+  .pal-foot { display: none; }
+  .pal-list { max-height: 65vh; }
+}
+
+/* ---------- Справка по горячим клавишам ---------- */
+.hk-title { margin: 4px 0 10px; font-size: 12px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; color: var(--text-2); }
+.hk-title ~ .hk-title { margin-top: 20px; }
+.hk-list { display: grid; grid-template-columns: 96px 1fr; gap: 8px 16px; align-items: center; }
+.hk-keys { display: inline-flex; }
+
+/* ---------- Кнопка «Наверх» и прогресс чтения ---------- */
+.to-top {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--navy);
+  color: #fff;
+  font-size: 18px;
+  box-shadow: 0 6px 16px rgba(10, 26, 52, 0.28);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(12px) scale(0.9);
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s, background 0.2s;
+}
+.to-top.is-visible { opacity: 1; transform: none; pointer-events: auto; }
+.to-top:hover { background: var(--primary); }
+[data-theme="dark"] .to-top { background: #1f3a6b; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5); }
+[data-theme="dark"] .to-top:hover { background: var(--primary); }
+
+.read-progress {
+  position: fixed;
+  top: 0;
+  left: var(--sider-w);
+  right: 0;
+  z-index: 300;
+  height: 3px;
+  background: var(--primary);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+@media (max-width: 767px) {
+  .read-progress { left: 0; }
+  .to-top { right: 16px; bottom: 16px; }
+}
+
+/* ---------- Анимации ---------- */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes popIn {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Появление страницы и «волна» карточек — только при загрузке (класс снимается через ~1,4 с) */
+.is-entering #page { animation: fadeUp 0.35s ease-out both; }
+.is-entering #page .grid > *,
+.is-entering #page .card > .row,
+.is-entering #page .table-box > .t-row {
+  animation: fadeUp 0.45s ease-out both;
+  animation-delay: calc(var(--i, 0) * 45ms + 80ms);
+}
+
+/* Карточки приподнимаются под курсором, кнопки «нажимаются» */
+.card-hover { transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s; }
+.card-hover:hover { transform: translateY(-3px); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.menu a .ico, .admin-menu .ico { transition: transform 0.2s; }
+.menu a:hover .ico, .admin-menu .menu-link:hover .ico { transform: translateX(2px); }
+.dd-panel { animation: popIn 0.16s ease-out; }
+.avatar img { transition: transform 0.3s; }
+.row:hover .avatar img, .t-row:hover .avatar img { transform: scale(1.08); }
+
+/* Плавная смена темы: включается из features.js на время переключения */
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

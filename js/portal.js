@@ -28,10 +28,18 @@
     }).sort(function (a, b) { return a.days - b.days; });
   }
 
+  /* Обложка новости: фото, если есть, иначе фирменная заливка с названием категории */
+  function newsCover(n, cls) {
+    if (n.cover) {
+      return '<div class="news-cover has-photo ' + cls + '"><img src="' + esc(UI.asset(n.cover)) + '" alt="" loading="lazy" decoding="async"></div>';
+    }
+    return '<div class="news-cover ' + cls + '">' + esc(UI.nameOf(DB.newsCategories, n.cat)) + '</div>';
+  }
+
   function newsCard(n, small) {
     var cat = UI.nameOf(DB.newsCategories, n.cat);
     return '<a class="link-block" href="news-article.html?slug=' + n.slug + '"><article class="card card-hover news-card">' +
-      '<div class="news-cover' + (small ? ' small' : '') + '">' + esc(cat) + '</div>' +
+      newsCover(n, small ? 'small' : '') +
       '<div class="card-body"><span class="tag tag-primary">' + esc(cat) + '</span>' +
       '<h5>' + esc(n.title) + '</h5><span class="date">' + UI.fmt(n.published) + '</span>' +
       (small ? '' : '<p class="snippet">' + esc(snippet(n.content)) + '</p>') + '</div></article></a>';
@@ -353,13 +361,13 @@
       var mark = head ? UI.vacMark(head.id, vac) : '';
       if (u.type === 'position') {
         return '<div class="org-card org-pos' + hl + '" data-unit="' + u.id + '" data-head="' + (head ? head.id : '') + '">' +
-          '<div class="org-pos-top">' + (head ? '<span class="avatar avatar-sm accent">' + esc(UI.initials(head)) + '</span>' : '') +
+          '<div class="org-pos-top">' + (head ? UI.avatar(head, 'avatar-sm accent') : '') +
           '<strong>' + esc(head ? UI.fullName(head) : u.name) + '</strong>' + mark + '</div>' +
           '<span class="org-pos-sub">' + esc(head ? posName(head) : UNIT_LABEL[u.type]) + '</span></div>';
       }
       return '<div class="org-card org-unit' + hl + '" data-unit="' + u.id + '" style="background:' + (hl ? '' : (UNIT_BG[u.type] || '#fff')) + '">' +
         '<strong class="org-unit-name">' + esc(u.name) + '</strong>' +
-        (head ? '<div class="org-unit-head"><span class="avatar avatar-xxs">' + esc(UI.initials(head)) + '</span><span class="muted">' + esc(UI.fullName(head)) + '</span>' + mark + '</div>' : '') + '</div>';
+        (head ? '<div class="org-unit-head">' + UI.avatar(head, 'avatar-xxs') + '<span class="muted">' + esc(UI.fullName(head)) + '</span>' + mark + '</div>' : '') + '</div>';
     }
     function subtree(n, q) {
       return '<div class="org-subtree">' + card(n, q) + (n.children.length ? '<div class="org-vchildren">' +
@@ -476,7 +484,7 @@
     var a = UI.user(n.author), cat = UI.nameOf(DB.newsCategories, n.cat);
     document.title = n.title + ' — Орбита';
     root.innerHTML = '<div class="article-wrap"><p><a class="btn" href="news.html">' + UI.icon('back') + 'Назад</a></p>' +
-      '<article class="article"><div class="news-cover article-cover">' + esc(cat) + '</div><div class="article-body">' +
+      '<article class="article">' + newsCover(n, 'article-cover') + '<div class="article-body">' +
       '<span class="tag tag-primary">' + esc(cat) + '</span><h3 style="margin-top:12px">' + esc(n.title) + '</h3>' +
       '<div class="article-meta"><span>' + UI.fmt(n.published) + '</span><a class="author" href="#" data-user="' + a.id + '">' + UI.avatar(a, 'avatar-sm') + esc(UI.fullName(a)) + '</a></div>' +
       '<div class="news-html">' + n.content + '</div></div></article></div>';
@@ -923,7 +931,7 @@
     function render() {
       var u = me(), role = UI.find(DB.roles, u.role), mgr = u.manager ? UI.user(u.manager) : null;
       root.innerHTML = '<h4 class="page-title">Профиль</h4><div class="card" style="max-width:860px"><div class="card-body"><div class="profile">' +
-        '<span class="avatar avatar-lg">' + esc(UI.initials(u)) + '</span><div><h4>' + esc(UI.fullName(u)) + '</h4>' +
+        UI.avatar(u, 'avatar-lg') + '<div><h4>' + esc(UI.fullName(u)) + '</h4>' +
         '<p class="muted" style="margin:0 0 8px">' + esc(posName(u)) + '</p><span class="tag ' + (u.role === 'admin' ? 'tag-primary' : 'tag-navy') + '">' + esc(role.name) + '</span></div></div></div>' +
         '<dl class="desc" style="border-top:1px solid var(--border)"><dt>Почта</dt><dd>' + esc(u.email) + '</dd><dt>Телефон</dt><dd>' + esc(u.phone || '—') + '</dd>' +
         '<dt>Внутренний номер</dt><dd>' + esc(u.vn || '—') + '</dd><dt>Подразделение</dt><dd>' + esc(UI.nameOf(DB.orgUnits, u.unit)) + '</dd>' +

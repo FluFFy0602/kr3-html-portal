@@ -1,0 +1,146 @@
+/* ==========================================================================
+   Тёмная тема. Включается атрибутом data-theme="dark" на <html> (js/theme.js).
+   Сначала переопределяем переменные, затем — места, где цвета заданы явно.
+   Подключается после style.css и app.css.
+   ========================================================================== */
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --page-bg: #0d1424;
+  --surface: #141d30;
+  --surface-2: #1a2438;
+  --elevated: #1b2539;
+  --heading: #eef2fa;
+
+  --text: rgba(255, 255, 255, 0.87);
+  --text-2: rgba(255, 255, 255, 0.55);
+  --text-3: rgba(255, 255, 255, 0.45);
+  --border: #253149;
+  --border-2: #34425e;
+  --row-border: #1e293d;
+  --row-hover: #1b2640;
+  --row-accent: rgba(242, 85, 27, 0.12);
+  --head-bg: #182236;
+}
+
+/* ---------- Каркас ---------- */
+[data-theme="dark"] .sider { background: #0a1120; box-shadow: inset -1px 0 0 var(--border); }
+[data-theme="dark"] .mobile-header { background: #0a1120; box-shadow: 0 1px 0 var(--border); }
+[data-theme="dark"] .shell-admin .main,
+[data-theme="dark"] .shell-admin .content { background: var(--page-bg); }
+[data-theme="dark"] .admin-header { background: var(--surface); }
+[data-theme="dark"] .site-footer { border-top-color: var(--border); }
+[data-theme="dark"] .footer-logo .logo-on-light { display: none; }
+[data-theme="dark"] .footer-logo .logo-on-dark { display: block; }
+
+/* ---------- Поверхности: карточки, таблицы, всплывающие окна ---------- */
+[data-theme="dark"] .card,
+[data-theme="dark"] .article,
+[data-theme="dark"] .table-box,
+[data-theme="dark"] .table-scroll,
+[data-theme="dark"] .data-table,
+[data-theme="dark"] .org-node,
+[data-theme="dark"] .cal-table,
+[data-theme="dark"] .cal-name,
+[data-theme="dark"] .pager a,
+[data-theme="dark"] .pager span,
+[data-theme="dark"] .online { background: var(--surface); }
+
+[data-theme="dark"] .modal,
+[data-theme="dark"] .dd-panel,
+[data-theme="dark"] .toast {
+  background: var(--elevated);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border);
+}
+[data-theme="dark"] .modal-mask { background: rgba(0, 0, 0, 0.6); }
+[data-theme="dark"] .card-hover:hover { box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45); border-color: var(--border-2); }
+
+/* ---------- Заголовки и «тёмно-синий» текст ---------- */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] .strong,
+[data-theme="dark"] .stat-value,
+[data-theme="dark"] .row .name,
+[data-theme="dark"] .t-row .person .name,
+[data-theme="dark"] .org-title,
+[data-theme="dark"] .org-unit-name,
+[data-theme="dark"] .extra-title,
+[data-theme="dark"] .perm-table .group-row td,
+[data-theme="dark"] .online,
+[data-theme="dark"] .footer-brand b,
+[data-theme="dark"] .org-card.is-hl { color: var(--heading); }
+
+[data-theme="dark"] .news-html blockquote { color: rgba(255, 255, 255, 0.7); }
+[data-theme="dark"] .service p,
+[data-theme="dark"] .org-card.is-hl .org-pos-sub { color: var(--text-2); }
+[data-theme="dark"] .list-group,
+[data-theme="dark"] .empty { color: var(--text-3); }
+
+/* ---------- Кнопки ---------- */
+[data-theme="dark"] .btn { color: var(--text); background: var(--surface-2); border-color: var(--border-2); }
+[data-theme="dark"] .btn:hover,
+[data-theme="dark"] .btn.is-open { color: var(--primary); border-color: var(--primary); }
+[data-theme="dark"] .btn-primary,
+[data-theme="dark"] .btn-primary:hover,
+[data-theme="dark"] .btn-primary.is-open { color: #fff; }
+[data-theme="dark"] .btn-primary { background: var(--primary); border-color: var(--primary); }
+[data-theme="dark"] .btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+[data-theme="dark"] .btn-danger { color: #fff; background: var(--danger); border-color: var(--danger); }
+[data-theme="dark"] .btn-link { color: var(--primary); background: transparent; }
+[data-theme="dark"] .btn-text { background: transparent; border-color: transparent; }
+[data-theme="dark"] .btn:disabled { color: rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.04); border-color: var(--border); }
+[data-theme="dark"] .bell-dark { color: var(--text-2); }
+[data-theme="dark"] .modal-close { color: var(--text-2); }
+[data-theme="dark"] .modal-close:hover { color: var(--text); background: rgba(255, 255, 255, 0.08); }
+
+/* ---------- Поля ввода и переключатели ---------- */
+[data-theme="dark"] .input-wrap,
+[data-theme="dark"] .control { background: var(--surface-2); }
+[data-theme="dark"] .input-wrap input::placeholder { color: rgba(255, 255, 255, 0.3); }
+[data-theme="dark"] .control:disabled { color: rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.04); }
+[data-theme="dark"] .segmented { background: rgba(255, 255, 255, 0.06); }
+[data-theme="dark"] .segmented a:hover { background: rgba(255, 255, 255, 0.08); }
+[data-theme="dark"] .segmented a.is-active { background: var(--surface-2); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4); }
+[data-theme="dark"] .pager .is-disabled { color: rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.04); }
+[data-theme="dark"] .data-table code { background: rgba(255, 255, 255, 0.08); }
+
+/* ---------- Теги, аватары, иконки статистики ---------- */
+[data-theme="dark"] .tag-navy { background: #2a3a5c; border-color: #2a3a5c; }
+[data-theme="dark"] .tag-success { background: rgba(82, 196, 26, 0.12); border-color: rgba(82, 196, 26, 0.4); color: #95de64; }
+[data-theme="dark"] .tag-warning { background: rgba(250, 173, 20, 0.12); border-color: rgba(250, 173, 20, 0.4); color: #ffd666; }
+[data-theme="dark"] .tag-danger { background: rgba(255, 77, 79, 0.12); border-color: rgba(255, 77, 79, 0.4); color: #ff7875; }
+[data-theme="dark"] .tag-info { background: rgba(22, 119, 255, 0.14); border-color: rgba(22, 119, 255, 0.45); color: #69b1ff; }
+[data-theme="dark"] .tag-soft,
+[data-theme="dark"] .vac-mark { background: rgba(242, 85, 27, 0.14); border-color: rgba(242, 85, 27, 0.45); color: #ff9c6e; }
+
+[data-theme="dark"] .avatar { background: #24365a; }
+[data-theme="dark"] .avatar.accent { background: var(--primary); }
+[data-theme="dark"] .stat-icon,
+[data-theme="dark"] .group-city { background: #1f3a6b; }
+[data-theme="dark"] .stat-icon.accent { background: var(--primary); }
+[data-theme="dark"] .news-cover img { filter: brightness(0.92); }
+
+/* ---------- Таймлайн, календарь отпусков ---------- */
+[data-theme="dark"] .timeline li::before { background: var(--surface); }
+[data-theme="dark"] .is-weekend { background: #172034; }
+[data-theme="dark"] .lg-pend,
+[data-theme="dark"] .cal-cell.is-pend { background: rgba(242, 85, 27, 0.45); }
+[data-theme="dark"] .cal-cell.is-today { box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.7); }
+
+/* ---------- Оргструктура ---------- */
+[data-theme="dark"] .org-scroll::-webkit-scrollbar-track { background: var(--surface-2); }
+[data-theme="dark"] .org-scroll::-webkit-scrollbar-thumb { background: var(--border-2); }
+[data-theme="dark"] .org-children-stack::before,
+[data-theme="dark"] .org-trunk,
+[data-theme="dark"] .org-child-col::before,
+[data-theme="dark"] .org-child-col::after,
+[data-theme="dark"] .org-vchildren::before,
+[data-theme="dark"] .org-vchild::before { background: var(--border-2); }
+[data-theme="dark"] .org-pos { background: #1f3a6b; border-color: #2c4a80; }
+/* Подразделения раскрашены inline-стилем по типу — в тёмной теме приводим к одной поверхности */
+[data-theme="dark"] .org-unit { background: var(--surface) !important; border-color: var(--border-2); }
+[data-theme="dark"] .org-card.is-hl { background: var(--row-accent) !important; border-color: var(--primary); }

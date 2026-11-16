@@ -135,7 +135,7 @@
       function rows(list) { return '<dl class="desc desc-sm">' + list.map(function (x) { return '<dt>' + x[0] + '</dt><dd>' + x[1] + '</dd>'; }).join('') + '</dl>'; }
       var m = UI.modal({
         width: 640, centered: true,
-        html: '<div class="user-head"><span class="avatar avatar-xl">' + esc(UI.initials(u)) + '</span><h4>' + esc(UI.fullName(u)) + '</h4>' +
+        html: '<div class="user-head">' + UI.avatar(u, 'avatar-xl') + '<h4>' + esc(UI.fullName(u)) + '</h4>' +
           '<span class="tag ' + (u.role === 'admin' ? 'tag-primary' : 'tag-navy') + '">' + esc(r.name) + '</span></div>' +
           rows([['Email', esc(u.email)], ['Телефон', esc(u.phone || '—')], ['Внутренний №', esc(u.vn || '—')],
             ['Подразделение', esc(UI.nameOf(DB.orgUnits, u.unit))], ['Должность', esc(UI.nameOf(DB.positions, u.position))], ['Город', esc(UI.nameOf(DB.cities, u.city))],

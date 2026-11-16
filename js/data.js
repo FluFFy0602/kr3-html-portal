@@ -1,6 +1,7 @@
 /* Демо-данные портала. Даты считаются от сегодняшнего дня, чтобы «сегодня»,
    «через N дней» и «сейчас в отпуске» всегда выглядели живыми.
-   Правки из админки и со страниц портала хранятся в localStorage (ключ orbita-db). */
+   Правки из админки и со страниц портала хранятся в localStorage (ключ orbita-db-v2).
+   Фото сотрудников — images/avatars/<id>.jpg, обложки новостей — images/news/<id>.jpg. */
 (function () {
   'use strict';
 
@@ -13,7 +14,8 @@
   }
   function isoOff(n) { return iso(off(n)); }
 
-  var STORE_KEY = 'orbita-db-v1';
+  // v2: у сотрудников появилось фото, у новостей — обложка
+  var STORE_KEY = 'orbita-db-v2';
 
   var cities = [
     { id: 'msk', name: 'Москва', active: true },
@@ -60,6 +62,7 @@
     var b = off(bd);
     var u = {
       id: id, last: last, first: first, patr: patr, email: email, phone: '', vn: vn,
+      photo: 'images/avatars/' + id + '.jpg',
       position: pos, unit: unit, city: city, manager: mgr,
       bm: b.getMonth() + 1, bday: b.getDate(),
       role: role, info: '', active: true, hired: '2019-03-01', fired: null,
@@ -120,28 +123,28 @@
   ];
 
   var news = [
-    { id: 'n1', slug: 'itogi-korporativa', cat: 'life', author: 'u13', published: isoOff(-1), status: 'published',
+    { id: 'n1', slug: 'itogi-korporativa', cat: 'life', author: 'u13', published: isoOff(-1), status: 'published', cover: 'images/news/n1.jpg',
       title: 'Итоги осеннего корпоратива: фото и благодарности',
       content: '<p>Спасибо всем, кто пришёл! Делимся фотографиями с мероприятия, а также рассказываем, какие идеи для следующего года предложили коллеги.</p><h4>Что понравилось больше всего</h4><ul><li>Квест по офису с командами из разных городов</li><li>Живая музыка и дружеский турнир по настольному теннису</li><li>Праздничный ужин в тёплой компании</li></ul><blockquote>Было здорово наконец увидеть коллег из Казани и Петербурга вживую.</blockquote><p>Идеи на следующий год можно оставить в <a href="surveys.html">опросе</a>.</p>' },
-    { id: 'n2', slug: 'obnovlenie-vpn', cat: 'it', author: 'u3', published: isoOff(-4), status: 'published',
+    { id: 'n2', slug: 'obnovlenie-vpn', cat: 'it', author: 'u3', published: isoOff(-4), status: 'published', cover: 'images/news/n2.jpg',
       title: 'Обновление VPN-клиента: что нужно сделать до 1 ноября',
       content: '<p>С 1 ноября старые версии VPN-клиента перестанут подключаться к корпоративной сети: мы переходим на новый протокол шифрования. Чтобы не остаться без удалённого доступа, обновите клиент заранее.</p><h4>Как обновить</h4><ol><li>Откройте раздел <a href="vpn.html">VPN</a> и скачайте актуальный дистрибутив.</li><li>Закройте текущий клиент и запустите установщик.</li><li>Войдите под своей учётной записью — профиль подтянется автоматически.</li></ol><blockquote>Если подключиться не получилось, создайте заявку в разделе «Заявки».</blockquote><hr><p>Спасибо, что помогаете нам делать инфраструктуру безопаснее!</p>' },
-    { id: 'n3', slug: 'grafik-otpuskov-2027', cat: 'hr', author: 'u14', published: isoOff(-7), status: 'published',
+    { id: 'n3', slug: 'grafik-otpuskov-2027', cat: 'hr', author: 'u14', published: isoOff(-7), status: 'published', cover: 'images/news/n3.jpg',
       title: 'График отпусков на 2027 год: приём заявок открыт',
       content: '<p>До 15 ноября необходимо внести желаемые периоды отпуска в разделе <a href="vacations.html">«Отпуска»</a> и согласовать их с руководителем.</p><p>Напоминаем: хотя бы одна часть отпуска должна быть не короче 14 календарных дней.</p>' },
-    { id: 'n4', slug: 'instruktazh-pozhar', cat: 'ot', author: 'u3', published: isoOff(-10), status: 'published',
+    { id: 'n4', slug: 'instruktazh-pozhar', cat: 'ot', author: 'u3', published: isoOff(-10), status: 'published', cover: 'images/news/n4.jpg',
       title: 'Плановый инструктаж по пожарной безопасности',
       content: '<p>Инструктаж пройдёт в переговорной «Волга» в среду в 11:00. Присутствие обязательно для всех сотрудников офиса.</p>' },
-    { id: 'n5', slug: 'sportivnaya-sektsiya', cat: 'life', author: 'u15', published: isoOff(-13), status: 'published',
+    { id: 'n5', slug: 'sportivnaya-sektsiya', cat: 'life', author: 'u15', published: isoOff(-13), status: 'published', cover: 'images/news/n5.jpg',
       title: 'Открыта запись в корпоративную спортивную секцию',
       content: '<p>Волейбол по вторникам и четвергам, плавание по субботам. Запишитесь у координатора до конца месяца.</p>' },
-    { id: 'n6', slug: 'fishing-pamyatka', cat: 'it', author: 'u3', published: isoOff(-18), status: 'published',
+    { id: 'n6', slug: 'fishing-pamyatka', cat: 'it', author: 'u3', published: isoOff(-18), status: 'published', cover: 'images/news/n6.jpg',
       title: 'Как распознать фишинговое письмо: короткая памятка',
       content: '<p>Пять признаков подозрительного письма и что делать, если вы уже перешли по ссылке.</p><ol><li>Неожиданное вложение или ссылка.</li><li>Срочность и угрозы.</li><li>Адрес отправителя не совпадает с названием.</li><li>Просьба ввести пароль.</li><li>Ошибки в тексте.</li></ol>' },
-    { id: 'n7', slug: 'novyy-ofis-kazan', cat: 'life', author: 'u17', published: isoOff(-24), status: 'published',
+    { id: 'n7', slug: 'novyy-ofis-kazan', cat: 'life', author: 'u17', published: isoOff(-24), status: 'published', cover: 'images/news/n7.jpg',
       title: 'Казанский филиал переезжает в новый офис',
       content: '<p>С 10 ноября казанская команда будет работать по новому адресу. Подробности — в рассылке.</p>' },
-    { id: 'n8', slug: 'chernovik-novosti', cat: 'hr', author: 'u14', published: null, status: 'draft',
+    { id: 'n8', slug: 'chernovik-novosti', cat: 'hr', author: 'u14', published: null, status: 'draft', cover: 'images/news/n8.jpg',
       title: 'Чек-лист для новых сотрудников (черновик)',
       content: '<p>Черновик новости для будущих публикаций.</p>' }
   ];

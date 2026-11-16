@@ -8,6 +8,12 @@
   var UI = {};
   window.UI = UI;
 
+  /* Корень сайта (абсолютный URL) — вычисляется от адреса этого скрипта, поэтому
+     пути к картинкам одинаково работают из корня, из admin/, через file:// и на GitHub Pages. */
+  var ROOT = ((document.currentScript && document.currentScript.src) || '').replace(/js\/ui\.js(?:[?#].*)?$/, '');
+  UI.root = ROOT;
+  UI.asset = function (path) { return ROOT + path; };
+
   /* ---------- Утилиты ---------- */
   function $(sel, root) { return (root || document).querySelector(sel); }
   function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
@@ -67,7 +73,11 @@
   /* ---------- Иконки ---------- */
   UI.icon = function (name, cls) { return '<i class="ico ico-' + name + (cls ? ' ' + cls : '') + '"></i>'; };
 
+  /* Аватар: фото, если оно есть, иначе инициалы. alt пустой — имя всегда выводится рядом. */
   UI.avatar = function (u, cls) {
+    if (u.photo) {
+      return '<span class="avatar has-photo ' + (cls || '') + '"><img src="' + esc(UI.asset(u.photo)) + '" alt="" loading="lazy" decoding="async"></span>';
+    }
     return '<span class="avatar ' + (cls || '') + '">' + esc(UI.initials(u)) + '</span>';
   };
 
@@ -331,7 +341,7 @@
       width: 520, centered: true, cls: 'user-modal',
       html:
         '<div class="user-head">' +
-          '<span class="avatar avatar-xl">' + esc(UI.initials(u)) + '</span>' +
+          UI.avatar(u, 'avatar-xl') +
           '<h4>' + esc(UI.fullName(u)) + '</h4>' +
           '<span class="tag ' + (u.role === 'admin' ? 'tag-primary' : 'tag-navy') + '">' + esc(role ? role.name : '') + '</span>' +
         '</div>' +
@@ -380,6 +390,8 @@
     { link: ['audit.html', 'Журнал аудита', 'audit', 'audit'] }
   ];
 
+  UI.menus = { portal: PORTAL_MENU, admin: ADMIN_MENU };
+
   function unreadCount() { return DB.notifications.filter(function (n) { return !n.read; }).length; }
 
   /* Логотип: знак из images/logo.svg + название текстом (alt пустой — название и так рядом) */
@@ -388,17 +400,43 @@
     return '<span class="brand"><img src="' + base + 'images/logo.svg" alt="" width="44" height="30">' + BRAND + '</span>';
   }
 
+  /* Подвал: логотип (на светлом фоне — тёмный вариант знака, на тёмной теме — белый) и правовая информация */
   function footer() {
     return '<footer class="site-footer">' +
-      '<span>© ' + new Date().getFullYear() + ' ООО «' + BRAND + '». Все права защищены.</span>' +
-      '<span>Информация на портале предназначена только для сотрудников компании.</span>' +
+      '<div class="footer-brand">' +
+        '<span class="footer-logo">' +
+          '<img class="logo-on-light" src="' + ROOT + 'images/logo-navy.svg" alt="" width="44" height="30">' +
+          '<img class="logo-on-dark" src="' + ROOT + 'images/logo.svg" alt="" width="44" height="30">' +
+        '</span>' +
+        '<div><b>' + BRAND + '</b> — корпоративный портал сотрудников ООО «' + BRAND + '».' +
+        '<span>Новости, коллеги, отпуска, заявки и база знаний — в одном месте.</span></div>' +
+      '</div>' +
+      '<div class="footer-legal">' +
+        '<span>© ' + new Date().getFullYear() + ' ООО «' + BRAND + '». Все права защищены.</span>' +
+        '<span>Информация на портале предназначена только для сотрудников компании.</span>' +
+        '<button type="button" class="footer-link" data-hotkeys>Горячие клавиши</button>' +
+      '</div>' +
       '</footer>';
+  }
+
+  /* Кнопки фич (обработчики — в js/features.js): быстрый поиск и переключатель темы */
+  UI.modKey = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl';
+  function searchButton() {
+    return '<button type="button" class="sider-search" data-palette>' + UI.icon('search') +
+      '<span>Поиск</span><kbd>' + UI.modKey + ' K</kbd></button>';
+  }
+  UI.themeToggleInner = function () {
+    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    return UI.icon(dark ? 'sun' : 'moon') + (dark ? 'Светлая тема' : 'Тёмная тема');
+  };
+  function themeRow() {
+    return '<button type="button" class="rail-row" data-theme-toggle>' + UI.themeToggleInner() + '</button>';
   }
 
   function railUser(base, portalDir) {
     var me = UI.user(DB.me);
     return '<div class="rail-user">' +
-      '<a class="rail-user-link" href="' + portalDir + 'profile.html"><span class="avatar avatar-xs">' + esc(UI.initials(me)) + '</span>' +
+      '<a class="rail-user-link" href="' + portalDir + 'profile.html">' + UI.avatar(me, 'avatar-xs') +
       '<span class="name">' + esc(UI.shortName(me)) + '</span></a>' +
       '<button type="button" class="bell-btn' + (unreadCount() ? ' dot' : '') + '" data-bell title="Уведомления">' + UI.icon('bell') + '</button></div>';
   }
@@ -417,16 +455,19 @@
         '<a class="logo" href="index.html">' + brand('') + '</a>' +
         '<div class="side">' +
           (active === 'dashboard' ? '<button type="button" class="online-mini" data-online>' + onlineUsers().length + '</button>' : '') +
+          '<button type="button" class="hdr-btn" data-palette aria-label="Поиск">' + UI.icon('search') + '</button>' +
           '<button type="button" class="bell bell-btn' + (unreadCount() ? ' dot' : '') + '" data-bell aria-label="Уведомления">' + UI.icon('bell') + '</button>' +
         '</div>' +
       '</header>' +
       '<label class="nav-overlay" for="nav-toggle"></label>' +
       '<aside class="sider">' +
         '<a class="sider-logo" href="index.html">' + brand('') + '</a>' +
+        searchButton() +
         '<nav class="menu">' + menu + '</nav>' +
         '<div class="rail">' +
           '<a class="rail-row" href="services.html">' + UI.icon('apps') + 'Сервисы</a>' +
           (isAdmin ? '<a class="rail-row" href="admin/users.html">' + UI.icon('settings') + 'Администрирование</a>' : '') +
+          themeRow() +
           railUser(base, '') +
         '</div>' +
       '</aside>';
@@ -449,10 +490,12 @@
       '<label class="nav-overlay" for="nav-toggle"></label>' +
       '<aside class="sider admin-sider">' +
         '<div class="sider-logo admin-logo">' + brand('../') + '<div class="admin-title">Администрирование</div></div>' +
+        searchButton() +
         '<nav class="menu admin-menu">' + menu + '</nav>' +
         '<div class="rail">' +
           '<a class="rail-row" href="../services.html">' + UI.icon('apps') + 'Сервисы</a>' +
           '<a class="rail-row" href="../index.html">' + UI.icon('home') + 'Портал</a>' +
+          themeRow() +
           railUser('../', '../') +
         '</div>' +
       '</aside>';
@@ -505,6 +548,7 @@
       var head = document.createElement('header');
       head.className = 'admin-header';
       head.innerHTML = '<label for="nav-toggle" class="burger burger-dark" aria-label="Меню">' + UI.icon('menu') + '</label><span class="spacer"></span>' +
+        '<button type="button" class="bell-btn bell-dark only-mobile" data-palette aria-label="Поиск">' + UI.icon('search') + '</button>' +
         '<button type="button" class="bell-btn bell-dark' + (unreadCount() ? ' dot' : '') + ' only-mobile" data-bell>' + UI.icon('bell') + '</button>' +
         '<a class="btn btn-link" href="../login.html">' + UI.icon('logout') + '<span class="hide-mobile">Выйти</span></a>';
       main.appendChild(head);
