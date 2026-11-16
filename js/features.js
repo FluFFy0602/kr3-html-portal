@@ -1,9 +1,11 @@
 /* Фичи интерфейса портала:
-   1) тёмная тема — кнопка в сайдбаре и клавиша T (сама тема — js/theme.js и css/theme-dark.css);
+   1) тёмная тема — кнопка в сайдбаре и клавиша T; новая тема «раскрывается» кругом от кнопки
+      (сама тема — js/theme.js и css/theme-dark.css);
    2) быстрый поиск — Ctrl/⌘+K или «/»: разделы, админка, сотрудники, новости, база знаний, команды;
    3) горячие клавиши — «G», затем буква раздела; справка по «?»;
-   4) анимации появления страницы и карточек (с учётом prefers-reduced-motion);
-   5) кнопка «Наверх» и полоса прогресса чтения в статье.
+   4) анимации: появление страницы, блоки выезжают при прокрутке, числа в статистике «набегают»
+      (всё отключается при prefers-reduced-motion);
+   5) кнопка «Наверх» с кольцом прогресса прокрутки, полоса прогресса чтения и время чтения статьи.
    Подключается с defer после data.js и ui.js. */
 (function () {
   'use strict';
@@ -35,17 +37,45 @@
     $$('[data-theme-toggle]').forEach(function (b) { b.innerHTML = UI.themeToggleInner(); });
   }
 
-  var switchTimer;
-  function toggleTheme() {
-    if (!Theme) return;
-    // На время переключения включаем плавный переход цветов у всех элементов
-    if (!reduceMotion) {
-      root.classList.add('theme-switching');
-      clearTimeout(switchTimer);
-      switchTimer = setTimeout(function () { root.classList.remove('theme-switching'); }, 450);
-    }
+  function applyToggle() {
     Theme.toggle();
     syncThemeButtons();
+  }
+
+  // Точка, из которой раскрывается новая тема: центр кнопки-переключателя, если она на экране
+  function revealPoint(el) {
+    var w = window.innerWidth, h = window.innerHeight, x = w / 2, y = h / 2;
+    var b = el && el.getBoundingClientRect ? el.getBoundingClientRect() : null;
+    if (b && b.width && b.right > 0 && b.left < w && b.bottom > 0 && b.top < h) {
+      x = b.left + b.width / 2;
+      y = b.top + b.height / 2;
+    }
+    return { x: x, y: y, r: Math.hypot(Math.max(x, w - x), Math.max(y, h - y)) };
+  }
+
+  var switchTimer;
+  function toggleTheme(origin) {
+    if (!Theme) return;
+    if (reduceMotion) { applyToggle(); return; }
+
+    // View Transitions API: браузер снимает «кадр» старой темы, а новая раскрывается поверх кругом
+    if (document.startViewTransition) {
+      var p = revealPoint(origin || $('.sider [data-theme-toggle]'));
+      var transition = document.startViewTransition(applyToggle);
+      transition.ready.then(function () {
+        root.animate(
+          { clipPath: ['circle(0px at ' + p.x + 'px ' + p.y + 'px)', 'circle(' + p.r + 'px at ' + p.x + 'px ' + p.y + 'px)'] },
+          { duration: 750, easing: 'cubic-bezier(0.65, 0, 0.35, 1)', pseudoElement: '::view-transition-new(root)' }
+        );
+      }).catch(function () { /* переход прерван — тема уже применена */ });
+      return;
+    }
+
+    // Запасной вариант: на время переключения у всех элементов плавно перетекают цвета
+    root.classList.add('theme-switching');
+    clearTimeout(switchTimer);
+    switchTimer = setTimeout(function () { root.classList.remove('theme-switching'); }, 700);
+    applyToggle();
   }
   document.addEventListener('themechange', syncThemeButtons);
 
@@ -308,43 +338,107 @@
       openPalette();
     } else if (e.target.closest('[data-theme-toggle]')) {
       e.preventDefault();
-      toggleTheme();
+      toggleTheme(e.target.closest('[data-theme-toggle]'));
     } else if (e.target.closest('[data-hotkeys]')) {
       e.preventDefault();
       showHotkeys();
     }
   });
 
-  /* ================= 5. «Наверх» и прогресс чтения ================= */
+  /* ================= 4. Анимации при прокрутке и счётчики ================= */
+  // Блоки ниже первого экрана выезжают, когда до них доходит прокрутка; карточки в ряду — с небольшим сдвигом
+  function setupReveal() {
+    if (reduceMotion || !('IntersectionObserver' in window)) return;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        var el = en.target;
+        io.unobserve(el);
+        el.classList.add('is-revealed');
+        // После появления снимаем классы, чтобы не мешать hover-эффектам карточек
+        setTimeout(function () { el.classList.remove('reveal', 'is-revealed'); el.style.removeProperty('--d'); }, 1000);
+      });
+    }, { rootMargin: '0px 0px -40px 0px', threshold: 0.1 });
+
+    var fold = window.innerHeight;
+    $$('#page .grid > *, #page .card:not(.grid .card), #page .table-box, #page .table-scroll, #page .org-scroll, .site-footer').forEach(function (el) {
+      if (el.getBoundingClientRect().top < fold) return;      // первый экран анимируется при загрузке
+      if (el.parentElement.closest('.reveal')) return;        // родитель уже выезжает целиком
+      if (el.parentElement.classList.contains('grid')) {
+        el.style.setProperty('--d', (Array.prototype.indexOf.call(el.parentElement.children, el) % 4) * 80 + 'ms');
+      }
+      el.classList.add('reveal');
+      io.observe(el);
+    });
+  }
+
+  // Числа в карточках статистики «набегают» от нуля с замедлением к концу
+  function countUp() {
+    if (reduceMotion) return;
+    $$('#page .stat-value').forEach(function (el) {
+      var text = el.textContent.trim();
+      if (!/^\d+$/.test(text)) return;
+      var target = Number(text), start = null, DURATION = 1000;
+      el.textContent = '0';
+      function step(ts) {
+        if (start === null) start = ts;
+        var t = Math.min(1, (ts - start) / DURATION);
+        el.textContent = String(Math.round(target * (1 - Math.pow(1 - t, 3))));
+        if (t < 1) window.requestAnimationFrame(step);
+      }
+      window.requestAnimationFrame(step);
+    });
+  }
+
+  /* ================= 5. «Наверх», прогресс чтения, время чтения ================= */
+  function readingTime() {
+    var meta = $('.article-meta'), body = $('.news-html');
+    if (!meta || !body) return;
+    var words = (body.textContent || '').trim().split(/\s+/).length;
+    var minutes = Math.max(1, Math.round(words / 180));
+    meta.insertAdjacentHTML('beforeend', '<span class="read-time">' + UI.icon('clock') + minutes + ' мин чтения</span>');
+  }
+
   function setupScroll() {
+    // Кнопка «Наверх»: двойная стрелка и кольцо, которое заполняется по мере прокрутки страницы
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'to-top';
     btn.title = 'Наверх';
     btn.setAttribute('aria-label', 'Наверх');
-    btn.innerHTML = UI.icon('arrow-up');
+    btn.innerHTML =
+      '<svg class="to-top-ring" viewBox="0 0 48 48" aria-hidden="true">' +
+        '<circle class="to-top-track" cx="24" cy="24" r="22"/>' +
+        '<circle class="to-top-fill" cx="24" cy="24" r="22" pathLength="100"/>' +
+      '</svg>' + UI.icon('chevrons-up');
     btn.addEventListener('click', function () {
       window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
     });
     document.body.appendChild(btn);
+    var ring = $('.to-top-fill', btn);
 
-    var bar = null;
-    if (document.body.getAttribute('data-page') === 'news-article') {
-      bar = document.createElement('div');
-      bar.className = 'read-progress';
-      bar.setAttribute('aria-hidden', 'true');
-      document.body.appendChild(bar);
-    }
+    // Полоса прогресса чтения сверху: в статье — до конца текста статьи, на остальных страницах — до конца страницы
+    var bar = document.createElement('div');
+    bar.className = 'read-progress';
+    bar.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(bar);
+    var article = $('.article');
+
+    function clamp(v) { return Math.max(0, Math.min(1, v)); }
 
     var queued = false;
     function update() {
       queued = false;
       var y = window.pageYOffset || root.scrollTop;
+      var pageMax = root.scrollHeight - window.innerHeight;
+      var page = pageMax > 0 ? clamp(y / pageMax) : 0;
+
       btn.classList.toggle('is-visible', y > 400);
-      if (bar) {
-        var max = root.scrollHeight - window.innerHeight;
-        bar.style.transform = 'scaleX(' + (max > 0 ? Math.min(1, y / max) : 1) + ')';
-      }
+      ring.style.strokeDashoffset = String(100 - page * 100);
+
+      var readMax = article ? article.getBoundingClientRect().bottom + y + 24 - window.innerHeight : pageMax;
+      bar.style.transform = 'scaleX(' + (readMax > 0 ? clamp(y / readMax) : 1) + ')';
+      bar.classList.toggle('is-hidden', pageMax < 80);   // страница почти не прокручивается — полоса не нужна
     }
     window.addEventListener('scroll', function () {
       if (!queued) { queued = true; window.requestAnimationFrame(update); }
@@ -356,7 +450,10 @@
   /* Запуск после того, как ui.js построил оболочку, а portal.js / admin.js — содержимое страницы */
   document.addEventListener('DOMContentLoaded', function () {
     staggerItems();
+    readingTime();
     setupScroll();
+    setupReveal();
+    countUp();
     syncThemeButtons();
   });
 })();

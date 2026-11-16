@@ -9,6 +9,8 @@
 .ico-sun { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Cpath d='M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41'/%3E%3C/svg%3E"); }
 .ico-arrow-up { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 19V5M5 12l7-7 7 7'/%3E%3C/svg%3E"); }
 .ico-keyboard { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='5' width='20' height='14' rx='2'/%3E%3Cpath d='M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 13h.01M18 13h.01M10 13h4M8 16h8'/%3E%3C/svg%3E"); }
+.ico-chevrons-up { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 11l-5-5-5 5M17 18l-5-5-5 5'/%3E%3C/svg%3E"); }
+.ico-clock { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 6v6l4 2'/%3E%3C/svg%3E"); }
 .ico-enter { --i: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 10l-5 5 5 5'/%3E%3Cpath d='M20 4v7a4 4 0 0 1-4 4H4'/%3E%3C/svg%3E"); }
 
 /* ---------- Клавиши ---------- */
@@ -156,7 +158,7 @@ button.rail-row {
 .hk-list { display: grid; grid-template-columns: 96px 1fr; gap: 8px 16px; align-items: center; }
 .hk-keys { display: inline-flex; }
 
-/* ---------- Кнопка «Наверх» и прогресс чтения ---------- */
+/* ---------- Кнопка «Наверх»: двойная стрелка + кольцо прогресса прокрутки ---------- */
 .to-top {
   position: fixed;
   right: 24px;
@@ -165,41 +167,72 @@ button.rail-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: var(--navy);
-  color: #fff;
-  font-size: 18px;
-  box-shadow: 0 6px 16px rgba(10, 26, 52, 0.28);
+  background: #262b35;
+  color: var(--primary);
+  font-size: 24px;
+  box-shadow: 0 8px 20px rgba(10, 26, 52, 0.3);
   cursor: pointer;
   opacity: 0;
-  transform: translateY(12px) scale(0.9);
+  transform: translateY(16px) scale(0.85);
   pointer-events: none;
-  transition: opacity 0.25s, transform 0.25s, background 0.2s;
+  transition: opacity 0.3s, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s, color 0.2s;
 }
 .to-top.is-visible { opacity: 1; transform: none; pointer-events: auto; }
-.to-top:hover { background: var(--primary); }
-[data-theme="dark"] .to-top { background: #1f3a6b; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5); }
+.to-top:hover { background: var(--primary); color: #fff; }
+.to-top:hover .ico { animation: chevronsUp 0.7s ease-in-out; }
+.to-top .ico { position: relative; }
+.to-top-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.to-top-ring circle { fill: none; stroke-width: 3; }
+.to-top-track { stroke: rgba(255, 255, 255, 0.1); }
+.to-top-fill {
+  stroke: var(--primary);
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transition: stroke-dashoffset 0.15s linear;
+}
+.to-top:hover .to-top-fill { stroke: #fff; }
+[data-theme="dark"] .to-top { background: #1b2539; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), inset 0 0 0 1px var(--border); }
 [data-theme="dark"] .to-top:hover { background: var(--primary); }
 
+/* Стрелки «улетают» вверх и возвращаются снизу */
+@keyframes chevronsUp {
+  0% { transform: translateY(0); opacity: 1; }
+  45% { transform: translateY(-14px); opacity: 0; }
+  46% { transform: translateY(14px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* ---------- Полоса прогресса чтения ---------- */
 .read-progress {
   position: fixed;
   top: 0;
   left: var(--sider-w);
   right: 0;
   z-index: 300;
-  height: 3px;
-  background: var(--primary);
+  height: 4px;
+  border-radius: 0 2px 2px 0;
+  background: linear-gradient(90deg, var(--primary) 0%, #ff8a4c 100%);
+  box-shadow: 0 0 10px rgba(242, 85, 27, 0.55);
   transform: scaleX(0);
   transform-origin: 0 50%;
+  transition: transform 0.1s linear, opacity 0.3s;
   pointer-events: none;
 }
+.read-progress.is-hidden { opacity: 0; }
+
+/* Время чтения в шапке статьи */
+.read-time { display: inline-flex; align-items: center; gap: 6px; }
+.read-time::before { content: '·'; margin-right: 6px; }
+
 @media (max-width: 767px) {
-  .read-progress { left: 0; }
-  .to-top { right: 16px; bottom: 16px; }
+  .read-progress { top: var(--header-h); left: 0; }
+  .to-top { right: 16px; bottom: 16px; width: 48px; height: 48px; font-size: 22px; }
 }
 
 /* ---------- Анимации ---------- */
@@ -214,7 +247,7 @@ button.rail-row {
 
 /* Появление страницы и «волна» карточек — только при загрузке (класс снимается через ~1,4 с) */
 .is-entering #page { animation: fadeUp 0.35s ease-out both; }
-.is-entering #page .grid > *,
+.is-entering #page .grid > *:not(.reveal),
 .is-entering #page .card > .row,
 .is-entering #page .table-box > .t-row {
   animation: fadeUp 0.45s ease-out both;
@@ -231,11 +264,27 @@ button.rail-row {
 .avatar img { transition: transform 0.3s; }
 .row:hover .avatar img, .t-row:hover .avatar img { transform: scale(1.08); }
 
-/* Плавная смена темы: включается из features.js на время переключения */
+/* Блоки ниже первого экрана: выезжают снизу, когда до них доходит прокрутка (js/features.js) */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px) scale(0.98);
+  transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--d, 0ms);
+}
+.reveal.is-revealed { opacity: 1; transform: none; }
+
+/* Смена темы. Основной вариант — View Transitions: новая тема раскрывается кругом от кнопки,
+   анимацию clip-path задаёт features.js, поэтому стандартный кроссфейд браузера отключаем. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+/* Запасной вариант для браузеров без View Transitions: цвета всех элементов плавно перетекают */
 .theme-switching *,
 .theme-switching *::before,
 .theme-switching *::after {
-  transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease !important;
+  transition: background-color 0.6s ease, color 0.6s ease, border-color 0.6s ease, box-shadow 0.6s ease, fill 0.6s ease !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

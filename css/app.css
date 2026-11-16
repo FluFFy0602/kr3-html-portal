@@ -60,7 +60,7 @@ button { font-family: inherit; }
 .shell-admin .main, .shell-admin .content { background: #f5f5f5; }
 .shell-admin .main { display: flex; flex-direction: column; }
 .shell-admin .content { flex: 1; padding: 24px; }
-.shell-admin .site-footer { padding: 16px 24px; }
+.shell-admin .site-footer { padding: 16px 96px 16px 24px; }
 .admin-header {
   position: sticky;
   top: 0;
@@ -110,7 +110,7 @@ button { font-family: inherit; }
 @media (max-width: 767px) {
   .shell-admin .main { padding-top: 0; }
   .shell-admin .content { padding: 12px; }
-  .shell-admin .site-footer { padding: 12px; }
+  .shell-admin .site-footer { padding: 12px 76px 12px 12px; }
   .burger-dark { display: inline-flex; }
   .only-mobile, .bell-btn.only-mobile { display: inline-flex; }
   .hide-mobile { display: none; }

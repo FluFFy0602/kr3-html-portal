@@ -409,10 +409,10 @@
           '<img class="logo-on-dark" src="' + ROOT + 'images/logo.svg" alt="" width="44" height="30">' +
         '</span>' +
         '<div><b>' + BRAND + '</b> — корпоративный портал сотрудников ООО «' + BRAND + '».' +
-        '<span>Новости, коллеги, отпуска, заявки и база знаний — в одном месте.</span></div>' +
+        '<span>Новости, коллеги, отпуска, заявки и база знаний — в одном месте.</span>' +
+        '<span class="footer-copy">© ' + new Date().getFullYear() + ' ООО «' + BRAND + '». Все права защищены.</span></div>' +
       '</div>' +
       '<div class="footer-legal">' +
-        '<span>© ' + new Date().getFullYear() + ' ООО «' + BRAND + '». Все права защищены.</span>' +
         '<span>Информация на портале предназначена только для сотрудников компании.</span>' +
         '<button type="button" class="footer-link" data-hotkeys>Горячие клавиши</button>' +
       '</div>' +
