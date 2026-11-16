@@ -273,13 +273,23 @@ button.rail-row {
 }
 .reveal.is-revealed { opacity: 1; transform: none; }
 
-/* Смена темы. Основной вариант — View Transitions: новая тема раскрывается кругом от кнопки,
-   анимацию clip-path задаёт features.js, поэтому стандартный кроссфейд браузера отключаем. */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
+/* Смена темы. Основной вариант — View Transitions: браузер снимает кадр старой темы, а новая
+   раскрывается поверх него кругом от кнопки. Центр и радиус круга features.js кладёт в переменные
+   на <html>. Анимация целиком в CSS: она стартует в том же кадре, что и переход, без «вспышки». */
+@keyframes themeReveal {
+  from { clip-path: circle(0 at var(--reveal-x, 50%) var(--reveal-y, 50%)); }
+  to { clip-path: circle(var(--reveal-r, 150vmax) at var(--reveal-x, 50%) var(--reveal-y, 50%)); }
+}
+.theme-reveal::view-transition-old(root) { animation: none; }
+.theme-reveal::view-transition-new(root) {
+  animation: themeReveal 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
   mix-blend-mode: normal;
 }
+/* Пока идёт переход, собственные transition элементов отключены: новая тема сразу рисуется
+   в итоговых цветах, а не «догоняет» их внутри раскрывающегося круга */
+.theme-reveal *,
+.theme-reveal *::before,
+.theme-reveal *::after { transition: none !important; }
 /* Запасной вариант для браузеров без View Transitions: цвета всех элементов плавно перетекают */
 .theme-switching *,
 .theme-switching *::before,

@@ -53,29 +53,29 @@
     return { x: x, y: y, r: Math.hypot(Math.max(x, w - x), Math.max(y, h - y)) };
   }
 
-  var switchTimer;
+  // Пока идёт переключение, повторные нажатия игнорируем: иначе браузер обрывает анимацию рывком
+  var switching = false;
   function toggleTheme(origin) {
-    if (!Theme) return;
+    if (!Theme || switching) return;
     if (reduceMotion) { applyToggle(); return; }
+    switching = true;
 
-    // View Transitions API: браузер снимает «кадр» старой темы, а новая раскрывается поверх кругом
+    // View Transitions API: новая тема раскрывается кругом (анимация — в css/features.css)
     if (document.startViewTransition) {
       var p = revealPoint(origin || $('.sider [data-theme-toggle]'));
-      var transition = document.startViewTransition(applyToggle);
-      transition.ready.then(function () {
-        root.animate(
-          { clipPath: ['circle(0px at ' + p.x + 'px ' + p.y + 'px)', 'circle(' + p.r + 'px at ' + p.x + 'px ' + p.y + 'px)'] },
-          { duration: 750, easing: 'cubic-bezier(0.65, 0, 0.35, 1)', pseudoElement: '::view-transition-new(root)' }
-        );
-      }).catch(function () { /* переход прерван — тема уже применена */ });
+      root.style.setProperty('--reveal-x', p.x + 'px');
+      root.style.setProperty('--reveal-y', p.y + 'px');
+      root.style.setProperty('--reveal-r', Math.ceil(p.r) + 'px');
+      root.classList.add('theme-reveal');
+      var done = function () { root.classList.remove('theme-reveal'); switching = false; };
+      document.startViewTransition(applyToggle).finished.then(done, done);
       return;
     }
 
     // Запасной вариант: на время переключения у всех элементов плавно перетекают цвета
     root.classList.add('theme-switching');
-    clearTimeout(switchTimer);
-    switchTimer = setTimeout(function () { root.classList.remove('theme-switching'); }, 700);
     applyToggle();
+    setTimeout(function () { root.classList.remove('theme-switching'); switching = false; }, 700);
   }
   document.addEventListener('themechange', syncThemeButtons);
 
